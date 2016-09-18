@@ -31,6 +31,10 @@ or
 
 TODO: `lein run`?
 
+## Internals
+
+TODO: describe namespaces, where to find stuff, datastructures
+
 ## License
 
 Copyright © 2016 Fabrizio Ferrai and 
