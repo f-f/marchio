@@ -29,7 +29,7 @@
   [filenames]
   (->> filenames
        (filterv fs/exists?)
-       (mapv slurp)
+       (mapv #(slurp % :encoding "UTF-8"))
        (string/join \newline)))
 
 (def formats [:xml :html :ast])
