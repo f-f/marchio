@@ -13,6 +13,8 @@
                  [org.clojure/core.async "0.2.391"]
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [org.clojure/tools.cli "0.3.5"]
+                 [cheshire "5.6.3"]
+                 [com.taoensso/truss "1.3.6"]
                  [hiccup "1.0.5"]
                  [me.raynes/fs "1.4.6"]]
 
@@ -33,7 +35,6 @@
                                        :pretty-print false}}]}
 
   :profiles {:server-jvm {:jvm-opts ^:replace ["-server"]}
-             :1.7  {:dependencies [[org.clojure/clojure "1.7.0"]]}
              :1.8  {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :1.9  {:dependencies [[org.clojure/clojure "1.9.0-alpha12"]]}
              :test {:dependencies [[org.clojure/test.check "0.9.0"]]}
