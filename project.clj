@@ -17,6 +17,7 @@
                  [cheshire "5.6.3"]
                  [com.taoensso/truss "1.3.6"]
                  [hiccup "1.0.5"]
+                 [instaparse "1.4.3"]
                  [me.raynes/fs "1.4.6"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
