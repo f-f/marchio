@@ -12,6 +12,7 @@
                  [org.clojure/clojurescript "1.9.229"]
                  [org.clojure/core.async "0.2.391"]
                  [org.clojure/core.match "0.3.0-alpha4"]
+                 [org.clojure/data.xml "0.1.0-beta1"]
                  [org.clojure/tools.cli "0.3.5"]
                  [cheshire "5.6.3"]
                  [com.taoensso/truss "1.3.6"]
