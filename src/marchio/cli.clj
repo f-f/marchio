@@ -3,9 +3,7 @@
     [marchio.render :as r]
     [clojure.string :as string]
     [me.raynes.fs :as fs]
-    [clojure.tools.cli :as cli])
-  (:import
-    (java.io BufferedReader)))
+    [clojure.tools.cli :as cli]))
 
 (def project-version "0.1.0")
 
