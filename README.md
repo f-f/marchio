@@ -4,6 +4,8 @@
 
 TODO
 
+[![Dependency Status](https://www.versioneye.com/user/projects/57df6c1b037c2000458f785a/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57df6c1b037c2000458f785a)
+
 ## Usage
 
 TODO
