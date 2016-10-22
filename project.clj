@@ -8,12 +8,13 @@
             :comments "Same as Clojure"}
   :min-lein-version "2.3.3"
 
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha13"]
                  [org.clojure/clojurescript "1.9.229"]
-                 [org.clojure/core.async "0.2.391"]
+                 [org.clojure/core.async "0.2.395"]
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [org.clojure/data.xml "0.1.0-beta1"]
                  [org.clojure/tools.cli "0.3.5"]
+                 [better-cond "1.0.1"]
                  [cheshire "5.6.3"]
                  [com.taoensso/truss "1.3.6"]
                  [hiccup "1.0.5"]
