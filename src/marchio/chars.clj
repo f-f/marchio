@@ -17,5 +17,4 @@
 (def Backslash    (char 92))
 (def CloseBracket (char 93))
 (def Underscore   (char 95))
-(def Underscore   (char 95))
 (def Backtick     (char 96))
