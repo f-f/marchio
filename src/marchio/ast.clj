@@ -1,23 +1,10 @@
 (ns marchio.ast
   (:require
     [clojure.string :as string]
-    [clojure.walk :refer [postwalk]]))
-
-(def re-thematic-break #"^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$")
-(def re-maybe-special #"^[#`~*+_=<>0-9-]")
-(def re-non-space #"[^ \t\f\v\r\n\u000B]")
-(def re-bullet-list-marker #"^[*+-]")
-(def re-ordered-list-marker #"^(\d{1,9})([.])")
-(def re-ATX-heading-marker #"^#{1,6}(?:[ \t]+|$)")
-(def re-code-fence #"^`{3,}(?!.*`)|^~{3,}(?!.*~)")
-(def re-closing-code-fence #"^(?:`{3,}|~{3,})(?= *$)")
-(def re-setext-heading-line #"^(?:=+|-+)[ \t]*$")
-(def re-line-ending #"\r\n|\n|\r")
-
-(defn is-blank?
-  "Returns true if string contains only space characters."
-  [s]
-  (not (re-find re-non-space s)))
+    [clojure.walk :refer [postwalk]]
+    [clojure.zip :as z]
+    [marchio.inlines :as inlines]
+    [marchio.re :as re]))
 
 ;; --  Parsing strategy
 
@@ -62,22 +49,89 @@
 
 (def Document
   {:children []
-   :level    0
+   :offset   0
    :open?    true
-   :link-map {}})
+   :refmap   {}})
+
+;; Block types: Document, BlockQuote, ListItem, FencedCode,
+;; IndentedCode, RawHtmlBlock, Reference
+
+; 'finalize' is run when the block is closed.
+; 'continue' is run to check whether the block is continuing
+; at a certain line and offset (e.g. whether a block quote
+; contains a `>`.  It returns 0 for matched, 1 for not matched,
+; and 2 for "we've dealt with this line completely, go to next."}})
+(defprotocol Block
+  (match?        [this line])
+  (finalize      [this])
+  (can-contain   [this that])
+  (accepts-lines [this]))
+
+(def leaf-blocks
+  [:thematic-break
+   :atx-heading
+   :setext-heading
+   :indented-code-block
+   :fenced-code-block
+   :html-block
+   :link-ref-definition
+   :paragraph
+   :blank-line])
+
+(def container-blocks
+  [:block-quote
+   :list
+   :list-item])
+
+(def inline-blocks
+  [:backslash-escape
+   :entity-ref
+   :code-span
+   :emphasis
+   :link
+   :image
+   :autolink
+   :raw-html
+   :hard-line-break
+   :soft-line-breaks])
+
+(def md-element-keys
+  [:type
+   :attrs
+   :children])
+
+;; Heart of the AST is the Node
+(defrecord Node [tag attrs content])
+
+;; Node constructor
+(defn new-node [tag attrs content]
+  (->Node tag attrs content))
+
+(defn block-zip
+  "Returns a zipper for Block elements, given a root element"
+  {:added "1.0"}
+  [root]
+  (z/zipper (complement string?)
+            (comp seq :content)
+            (fn [node children]
+              (assoc node :content (and children (apply vector children))))
+            root))
 
 (defn parse-line [tree line]
-  (update tree :children conj line))
+  (update tree :content conj line))
 
 (defn close-blocks
-  ""
+  "Finalize every block in the tree. Close it and postprocess, e.g. creating
+   string_content from strings, setting the 'tight' or 'loose' status of a list,
+   and parsing the beginnings of paragraphs for reference definitions."
   [tree]
   (->> tree
        (postwalk
          (fn [el]
-           (if (and (map? el)
-                    (contains? el :open?))
-             (assoc el :open? false)
+           (if (and (map? el))
+             (-> el
+                 (assoc :open? false))
+                 ;(finalize el)) ;; <------------ TODO
              el)))))
 
 (defn block-structure
@@ -86,20 +140,10 @@
   [lines]
   (loop [tree Document
          ls   lines]
-    (println tree)
-    (println ls (count ls))
     (if (empty? ls)
-      (close-blocks tree) ;; I guess it's not "necessary" to close blocks
+      (close-blocks tree)
       (recur (parse-line tree (first ls))
              (rest ls)))))
-
-;; -- Phase 2
-
-;; TODO
-(defn inline-structure
-  "AST building, Phase 2: walk the half-open tree and parse inline text."
-  [tree]
-  tree)
 
 ;; -- API
 
@@ -111,16 +155,16 @@
 (defn- split-lines
   "Split input in a sequence of lines"
   [in]
-  (string/split in re-line-ending))
+  (string/split in re/line-ending))
 
-(defn parse
-  "Convert an UTF8 input string to a CommonMark Abstract Syntax Tree"
+(defn text->ast
+  "Parse an UTF8 input string to a CommonMark Abstract Syntax Tree"
   [input]
   (-> input
       (remove-insecure)
       (split-lines)
       (block-structure)
-      (inline-structure)))
+      (inlines/parse)))
 
 ;; TODO
 (defn ast->hiccup
@@ -129,6 +173,13 @@
   tree)
 
 (comment
-  (def tests (marchio.spec-tests/load-tests))
+  (def tests (marchio.test-utils/load-spec-tests))
   (def sample (:markdown (nth tests 16)))
+  (def test-cats (group-by :section tests))
+  (keys test-cats)
+  (marchio.test-utils/get-cmark-ast
+    (->> "Emphasis and strong emphasis"
+         (get test-cats)
+         (first)
+         (:markdown)))
   (re-seq #"\p{L}+" "prøve"))
