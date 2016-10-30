@@ -42,7 +42,7 @@
 (def opts
     [["-t" "--to FORMAT" (str "Specify output format: " (formats-to-string))
       :default :html
-      :validate [#(some? #{(keyword %)} formats)
+      :validate [#(some #{(keyword %)} formats)
                  (str "Must be one of " (formats-to-string))]]
      ["-h" "--help"      "Print this help"]
      ["-v" "--version"   "Print version information"]
