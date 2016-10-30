@@ -103,9 +103,10 @@
 ;; Heart of the AST is the Node
 (defrecord Node [tag attrs content])
 
-;; Node constructor
-(defn new-node [tag attrs content]
-  (->Node tag attrs content))
+(defn new-node
+  "Node entity constructors."
+  ([tag]               (new-node tag {} []))
+  ([tag attrs content] (->Node tag attrs content)))
 
 (defn block-zip
   "Returns a zipper for Block elements, given a root element"
