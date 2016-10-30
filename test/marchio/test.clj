@@ -6,7 +6,8 @@
     [clojure.test :refer [use-fixtures deftest testing is]]
     [cheshire.core :refer [parse-string generate-string]]
     [marchio.render :as render]
-    [marchio.ast :as ast :refer [new-node]])
+    [marchio.ast :refer [new-node]]
+    [marchio.parse :as parse])
   (:import (clojure.data.xml.node Element)))
 
 (defn cmark->marchio
@@ -49,6 +50,6 @@
   (doseq [{:keys [html markdown section example]} spec-tests]
     (testing (str "AST: " section ", " example)
       (is (= (get-cmark-ast markdown)
-             (ast/text->ast markdown))))
+             (parse/text->ast markdown))))
     (testing (str "HTML: " section ", " example)
       (is (= html (render/md->html markdown))))))

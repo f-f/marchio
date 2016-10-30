@@ -1,6 +1,6 @@
 (ns marchio.render
   (:require
-    [marchio.ast :refer [text->ast ast->hiccup]]
+    [marchio.parse :refer [text->ast ast->hiccup]]
     [hiccup.core :as hiccup]))
 
 (defn md->html

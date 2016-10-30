@@ -2,14 +2,15 @@
   (:require
     [clojure.string :as string]
     [marchio.chars :refer [Asterisk Newline Underscore Singlequote Doublequote]]
-    [marchio.re :as re :refer [match]]))
+    [marchio.re :as re :refer [match]]
+    [marchio.ast :refer [new-node]]))
 
 ;; -- Phase 2
 
 ;; -- Inline parsers
 
 (defn append-char [node char]
-  (update node :children
+  (update node :content
           (fn [children]
             (if-not (string? (last children))
               (conj (or children []) char)
@@ -17,7 +18,7 @@
                               (str (last children) char))))))
 
 (defn append-children [node new]
-  (update node :children conj new))
+  (update node :content conj new))
 
 (defn parse-emphasis
   "Search for delimiter runs (asterisk, underscore) or quotes, and return a
@@ -167,7 +168,7 @@
       Asterisk   (parse-emphasis chars prev-char)
       Underscore (parse-emphasis chars prev-char)
       [(rest chars)
-       {:type :text :attrs {} :children [(str c)]}]))) ;; TODO: introduce text records
+       (new-node :text (str c))])))
 
 (defn parse-text [line block]
   (loop [chars (seq line)
@@ -194,7 +195,7 @@
 
 (comment
   (def sample "*foo bar*\n")
-  (def n (marchio.test-utils/->Node :paragraph {} []))
+  (def n (marchio.ast/new-node :paragraph))
   (append-char (append-char n sample) "aaa")
   (append-char (append-children (append-char n sample) n) "aaa")
   (parse-next-char sample nil)
