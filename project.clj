@@ -42,11 +42,15 @@
   :profiles {:server-jvm {:jvm-opts ^:replace ["-server"]}
              :1.8  {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :1.9  {:dependencies [[org.clojure/clojure "1.9.0-alpha14"]]}
-             :test {:dependencies [[org.clojure/test.check "0.9.0"]]}
+             :test {:dependencies [[org.clojure/test.check "0.9.0"]]
+                    :plugins [[com.jakemccrary/lein-test-refresh "0.17.0"]]}
              :dev [:1.9 :test :server-jvm]
              :uberjar {:aot :all}}
 
   :test-paths ["test" "src"]
+  :test-refresh {:notify-command ["notify-send" "-i" "/usr/share/pixmaps/idle.xpm" "-t" "5000" "Tests"]
+                 :quiet true
+                 :changes-only true}
 
   :bin {:name "marchio"}
   :clean-targets ^{:protect false} ["target"]
