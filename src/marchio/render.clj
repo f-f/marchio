@@ -1,6 +1,6 @@
 (ns marchio.render
   (:require
-    [marchio.ast :refer [parse ast->hiccup]]
+    [marchio.ast :refer [text->ast ast->hiccup]]
     [hiccup.core :as hiccup]))
 
 (defn md->html
@@ -8,6 +8,6 @@
   Throws an Exception on syntax error."
   [text]
   (-> text
-      (parse)         ;; Parse the input text to AST
-      (ast->hiccup)   ;; Convert the AST to Hiccup vectors
-      (hiccup/html))) ;; Convert the Hiccup to HTML
+      (text->ast)
+      (ast->hiccup)
+      (hiccup/html)))
