@@ -8,8 +8,8 @@
             :comments "Same as Clojure"}
   :min-lein-version "2.3.3"
 
-  :dependencies [[org.clojure/clojure "1.9.0-alpha13"]
-                 [org.clojure/clojurescript "1.9.229"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
+                 [org.clojure/clojurescript "1.9.293"]
                  [org.clojure/core.async "0.2.395"]
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [org.clojure/data.xml "0.1.0-beta1"]
@@ -19,7 +19,9 @@
                  [com.taoensso/truss "1.3.6"]
                  [hiccup "1.0.5"]
                  [instaparse "1.4.3"]
-                 [me.raynes/fs "1.4.6"]]
+                 [me.raynes/fs "1.4.6"]
+                 [swiss-arrows "1.0.0"]
+                 [uncomplicate/fluokitten "0.5.1"]]
 
   :plugins [[lein-cljsbuild "1.1.4"]
             [lein-codox "0.10.0"]
@@ -39,7 +41,7 @@
 
   :profiles {:server-jvm {:jvm-opts ^:replace ["-server"]}
              :1.8  {:dependencies [[org.clojure/clojure "1.8.0"]]}
-             :1.9  {:dependencies [[org.clojure/clojure "1.9.0-alpha12"]]}
+             :1.9  {:dependencies [[org.clojure/clojure "1.9.0-alpha14"]]}
              :test {:dependencies [[org.clojure/test.check "0.9.0"]]}
              :dev [:1.9 :test :server-jvm]
              :uberjar {:aot :all}}
