@@ -20,6 +20,7 @@
                  [hiccup "1.0.5"]
                  [instaparse "1.4.3"]
                  [me.raynes/fs "1.4.6"]
+                 [medley "0.8.3"]
                  [swiss-arrows "1.0.0"]
                  [uncomplicate/fluokitten "0.5.1"]]
 
