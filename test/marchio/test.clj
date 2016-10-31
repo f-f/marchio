@@ -46,10 +46,11 @@
 
 (use-fixtures :once spec-fixture)
 
-(deftest ast-testing
-  (doseq [{:keys [html markdown section example]} spec-tests]
-    (testing (str "AST: " section ", " example)
-      (is (= (get-cmark-ast markdown)
-             (parse/text->ast markdown))))
-    (testing (str "HTML: " section ", " example)
-      (is (= html (render/md->html markdown))))))
+(comment
+  (deftest ast-testing
+    (doseq [{:keys [html markdown section example]} spec-tests]
+      (testing (str "AST: " section ", " example)
+        (is (= (get-cmark-ast markdown)
+               (parse/text->ast markdown))))
+      (testing (str "HTML: " section ", " example)
+        (is (= html (render/md->html markdown)))))))
