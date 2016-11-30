@@ -2,9 +2,9 @@
   (:require
     [clojure.string :as string]
     [clojure.walk :refer [postwalk]]
-    [marchio.ast :refer [new-node]]
     [marchio.re :as re]
-    [marchio.inlines :as inlines]))
+    [marchio.inlines :as inlines]
+    [marchio.blocks :as blocks]))
 
 ;; --  Parsing strategy
 
@@ -46,12 +46,6 @@
 ;;    before creating the new block as a child of the last matched block.
 ;; 3. Look at the remainder of the line: thi is text that can be incorporated
 ;;    into the last open block (paragraph, code block, heading, or raw HTML).
-
-(def Document
-  {:children []
-   :offset   0
-   :open?    true
-   :refmap   {}})
 
 ;; Block types: Document, BlockQuote, ListItem, FencedCode,
 ;; IndentedCode, RawHtmlBlock, Reference
@@ -95,36 +89,6 @@
    :hard-line-break
    :soft-line-breaks])
 
-(defn parse-line [tree line]
-  (update tree :content conj line))
-
-(defn close-blocks
-  "Finalize every block in the tree. Close it and postprocess, e.g. creating
-   string_content from strings, setting the 'tight' or 'loose' status of a list,
-   and parsing the beginnings of paragraphs for reference definitions."
-  [tree]
-  (->> tree
-       (postwalk
-         (fn [el]
-           (if (and (map? el))
-             (-> el
-                 (assoc :open? false))
-             ;(finalize el)) ;; <------------ TODO
-             el)))))
-
-(defn block-structure
-  "AST Building, Phase 1: parse lines of text, and recursively build an AST
-   with only block structure."
-  [lines]
-  (loop [tree Document
-         ls   lines]
-    (if (empty? ls)
-      (close-blocks tree)
-      (recur (parse-line tree (first ls))
-             (rest ls)))))
-
-;; -- API
-
 (defn- remove-insecure
   "Removes the UTF8 char \u0000"
   [in]
@@ -135,14 +99,16 @@
   [in]
   (string/split in re/line-ending))
 
+;; -- API
+
 (defn text->ast
   "Parse an UTF8 input string to a CommonMark Abstract Syntax Tree"
   [input]
-  (-> input
-      (remove-insecure)
-      (split-lines)
-      (block-structure)
-      (inlines/parse)))
+  (->> input
+       (split-lines)
+       (map remove-insecure)
+       (blocks/parse)))
+       ;(inlines/parse)))
 
 ;; TODO
 (defn ast->hiccup
