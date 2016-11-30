@@ -16,11 +16,11 @@
                  [org.clojure/tools.cli "0.3.5"]
                  [better-cond "1.0.1"]
                  [cheshire "5.6.3"]
-                 [com.taoensso/truss "1.3.6"]
                  [hiccup "1.0.5"]
                  [instaparse "1.4.3"]
                  [me.raynes/fs "1.4.6"]
-                 [medley "0.8.3"]
+                 [medley "0.8.4"]
+                 [org.blancas/kern "1.0.0"]
                  [swiss-arrows "1.0.0"]
                  [uncomplicate/fluokitten "0.5.1"]]
 
