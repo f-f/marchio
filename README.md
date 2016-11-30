@@ -6,6 +6,19 @@ TODO
 
 [![Dependency Status](https://www.versioneye.com/user/projects/57df6c1b037c2000458f785a/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57df6c1b037c2000458f785a)
 
+## Rationale
+
+TODO add links to Monadic Parsing and Parsing with Derivatives papers.
+
+Instaparse is very powerful and well done, but due to its tradeoffs it [starts having issues around 20k-200k chars](https://github.com/Engelberg/instaparse/issues/131#issuecomment-209204750) (one of the test files is 10M, Commonmark C implementation eats it in couple of seconds).
+
+So, one alternative would be to implement a small parser combinators library (for fun) or use one of the following:
+- https://github.com/youngnh/parsatron
+- https://github.com/blancas/kern
+- https://github.com/van-clj/zetta-parser
+
+Kern looks best.
+
 ## Usage
 
 TODO
