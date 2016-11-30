@@ -17,7 +17,7 @@
                  [better-cond "1.0.1"]
                  [cheshire "5.6.3"]
                  [hiccup "1.0.5"]
-                 [instaparse "1.4.3"]
+                 [im.chit/hara.zip "2.4.8"]
                  [me.raynes/fs "1.4.6"]
                  [medley "0.8.4"]
                  [org.blancas/kern "1.0.0"]
