@@ -265,15 +265,30 @@
 (defparser Hardbreak
   [_ (k/times 2 (k/sym* c/Space))
    _ k/new-line*]
-  (new-node :hardbreak))
+  (new-node :linebreak))
 
 (defparser Softbreak
   [_ k/new-line*]
   (new-node :softbreak))
 
+;; Backslash, 1+2
+(defparser EscapedChar
+  [_ (k/sym* c/Backslash)
+   t (k/<|> (k/sym* c/Newline)
+            (cs/from-re re/escapable))]
+  (if (= t c/Newline)
+    (new-node :linebreak)
+    (new-node :text (str t))))
+
+;; Backslash, 3
+(defparser Backslash
+  [_ (k/sym* c/Backslash)]
+  (new-node :text "\\"))
+
+;; Fallback, just text
 (defparser Text
   [t k/any-char]
-  (new-node :text t))
+  (new-node :text (str t)))
 
 ;; -- API ----------------------------------------------------------------------
 
@@ -283,9 +298,11 @@
   (let [line (first children)]
     (-> (k/many (k/<|> Hardbreak
                        Softbreak
+                       EscapedChar
+                       Backslash
                        Text))
-        (k/value line)
-        (compact-text-nodes))))
+        (k/value line))))
+        ;(compact-text-nodes))))
 
 (defn parse
   "AST building, Phase 2: walk the half-open tree and parse inline text;
@@ -305,7 +322,9 @@
   (parse-next-char sample nil)
   (marchio.test/get-cmark-ast "aaa\nbbb  \nfoo")
   (marchio.test/get-cmark-ast sample2)
+  (marchio.test/get-cmark-ast "\\[")
   (parse-text sample2 n)
   (-> (ast/new-tree)
       (ast/append-child (new-node :paragraph "aaa\nbbb  \nfoo"))
+      (ast/append-child (new-node :paragraph "\\["))
       (parse)))

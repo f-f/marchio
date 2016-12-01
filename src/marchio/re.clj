@@ -19,6 +19,7 @@
 (def closing-code-fence #"^(?:`{3,}|~{3,})(?= *$)")
 (def setext-heading-line #"^(?:=+|-+)[ \t]*$")
 (def line-ending #"\r\n|\n|\r")
+(def escapable #"^[!\"#$%&'()*+,./:;<=>?@\\\[\\\]^_`{|}~-]")
 
 ;; -- Html regexps
 
