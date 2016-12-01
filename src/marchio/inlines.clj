@@ -285,6 +285,19 @@
   [_ (k/sym* c/Backslash)]
   (new-node :text "\\"))
 
+;; Backticks, 1
+(defparser InlineCode
+  [open  (k/many1 (k/sym* c/Backtick))
+   text  (k/many1 (k/none-of* (str c/Backtick)))
+   close (k/many1 (k/sym* c/Backtick))]
+  (= (count open) (count close))
+  (new-node :code (apply str text)))
+
+;; Backticks, 2
+(defparser Backticks
+  [ticks (k/many1 (k/sym* c/Backtick))]
+  (new-node :text (apply str ticks)))
+
 ;; Fallback, just text
 (defparser Text
   [t k/any-char]
@@ -300,6 +313,8 @@
                        Softbreak
                        EscapedChar
                        Backslash
+                       InlineCode
+                       Backticks
                        Text))
         (k/value line))))
         ;(compact-text-nodes))))
@@ -323,8 +338,10 @@
   (marchio.test/get-cmark-ast "aaa\nbbb  \nfoo")
   (marchio.test/get-cmark-ast sample2)
   (marchio.test/get-cmark-ast "\\[")
+  (marchio.test/get-cmark-ast "``aa`b`")
   (parse-text sample2 n)
   (-> (ast/new-tree)
       (ast/append-child (new-node :paragraph "aaa\nbbb  \nfoo"))
       (ast/append-child (new-node :paragraph "\\["))
+      (ast/append-child (new-node :paragraph "``aa`b`"))
       (parse)))
