@@ -13,13 +13,13 @@
 
 (defn new-tree
   "Returns a new tree zipper for the AST."
-  []
-  (z/zipper
-    (complement string?)
-    (comp seq :content)
-    (fn [node children]
-      (assoc node :content (and children (apply vector children))))
-    (new-node :document {:open? true} [])))
+  ([]     (new-tree (new-node :document {:open? true} [])))
+  ([root] (z/zipper
+            (complement string?)
+            (comp seq :content)
+            (fn [node children]
+              (assoc node :content (and children (apply vector children))))
+            root)))
 
 ;; Zippers are awesome:
 ;; http://josf.info/blog/2014/03/21/getting-acquainted-with-clojure-zippers/
@@ -29,7 +29,27 @@
 ;; TODO: implement `find-open-blocks`
 ;; http://spec.commonmark.org/0.27/#phase-1-block-structure
 
+(defn update-tree
+  "Takes an ast and a function, and if (t node) is truthy applies the f to every
+   node, recurring on the updated tree."
+  [tree t f]
+  (loop [loc (new-tree (z/root tree))]
+    (if (z/end? loc)
+      loc
+      (recur (z/next (if (t (z/node loc))
+                       (z/edit loc f)
+                       loc))))))
+
+(defn append-child
+  "Simple alias for same function in zip."
+  [tree new]
+  (z/append-child tree new))
+
 (comment
   (-> (new-tree)
-      (z/append-child (new-node :text "test"))))
-
+      (z/append-child (new-node :text "test"))
+      (z/append-child (new-node :text "test2"))
+      (update-tree
+        string?
+        #(do (println (type %) (string? %))
+             %))))
