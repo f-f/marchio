@@ -5,11 +5,18 @@
 ;; TODO: spec it
 (defmacro defparser
   "Boilerplate for a backtracking parser"
-  [name bindings return-body]
-  `(def ~name
-     (k/<:> (k/bind
-              ~bindings
-              (k/return ~return-body)))))
+  ([name bindings return-body]
+   `(def ~name
+      (k/<:> (k/bind
+               ~bindings
+               (k/return ~return-body)))))
+  ([name bindings test return-body]
+   `(def ~name
+      (k/<:> (k/bind
+               ~bindings
+               (if ~test
+                 (k/return ~return-body)
+                 (k/fail "Failed.")))))))
 
 (defn from-re [re]
   (k/<:> (k/bind [c k/any-char]
