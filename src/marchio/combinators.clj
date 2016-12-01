@@ -1,5 +1,6 @@
 (ns marchio.combinators
-  (:require [blancas.kern.core :as k]))
+  (:require [blancas.kern.core :as k]
+            [marchio.re :as re]))
 
 ;; TODO: spec it
 (defmacro defparser
@@ -9,6 +10,12 @@
      (k/<:> (k/bind
               ~bindings
               (k/return ~return-body)))))
+
+(defn from-re [re]
+  (k/<:> (k/bind [c k/any-char]
+           (if (re/match re c)
+             (k/return c)
+             (k/fail "No match from regex")))))
 
 (def any
   "Parser that accepts any character as input, returns string."
