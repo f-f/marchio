@@ -303,19 +303,27 @@
   [t k/any-char]
   (new-node :text (str t)))
 
+(def Inlines
+  (k/<|> Hardbreak
+         Softbreak
+         EscapedChar
+         Backslash
+         InlineCode
+         Backticks
+         ;EmphDelimiter
+         ;Brackets
+         ;Bang
+         ;LessTHan
+         ;Ampersand -> autolink | html
+         Text))
+
 ;; -- API ----------------------------------------------------------------------
 
 (defn parse-line
   "Parses one line searching for inlines, which then converts to nodes."
   [children]
   (let [line (first children)]
-    (-> (k/many (k/<|> Hardbreak
-                       Softbreak
-                       EscapedChar
-                       Backslash
-                       InlineCode
-                       Backticks
-                       Text))
+    (-> (k/many Inlines)
         (k/value line))))
         ;(compact-text-nodes))))
 
