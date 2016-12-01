@@ -14,7 +14,7 @@
 (defn from-re [re]
   (k/<:> (k/bind [c k/any-char]
            (if (re/match re c)
-             (k/return c)
+             (k/return (str c))
              (k/fail "No match from regex")))))
 
 (def any
