@@ -6,7 +6,9 @@
   "Boilerplate for a backtracking parser"
   [name bindings return-body]
   `(def ~name
-     (k/<:> (k/bind ~bindings (k/return ~return-body)))))
+     (k/<:> (k/bind
+              ~bindings
+              (k/return ~return-body)))))
 
 (def any
   "Parser that accepts any character as input, returns string."
