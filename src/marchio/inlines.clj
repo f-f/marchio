@@ -1,11 +1,13 @@
 (ns marchio.inlines
   (:require
     [clojure.string :as string]
+    [blancas.kern.core :as k]
     [uncomplicate.fluokitten.core :refer [fmap fapply bind return fold foldmap]]
     [uncomplicate.fluokitten.jvm]
-    [marchio.chars :refer [Asterisk Newline Underscore Singlequote Doublequote]]
+    [marchio.chars :as c]
     [marchio.re :as re :refer [match]]
-    [marchio.ast :refer [new-node]]))
+    [marchio.ast :as ast :refer [new-node]]
+    [marchio.combinators :as cs :refer [defparser]]))
 
 ;; -- Phase 2
 ;; -- Inline parsers
@@ -32,13 +34,13 @@
         before (or (if (char? prev-char)
                      prev-char
                      (first (seq prev-char)))
-                   Newline)
+                   c/Newline)
         char   (first chars)
-        after  (or (second chars) Newline)
+        after  (or (second chars) c/Newline)
         [run run-comp] (mapv #(% (partial = char) chars)
                              [take-while drop-while])
-        [delims new-chars] (if (or (= char Singlequote)
-                                   (= char Doublequote))
+        [delims new-chars] (if (or (= char c/Singlequote)
+                                   (= char c/Doublequote))
                              [1           (rest chars)]
                              [(count run) run-comp])
         [before-white? after-white?] (mapv #(match re/unicode-whitespace %)
@@ -63,9 +65,9 @@
                            (not right-flanking))
                       right-flanking]
         [opener? closer?] (condp = char
-                            Underscore  underscore-flags
-                            Singlequote quotes-flags
-                            Doublequote quotes-flags
+                            c/Underscore  underscore-flags
+                            c/Singlequote quotes-flags
+                            c/Doublequote quotes-flags
                             [left-flanking right-flanking])]
     (when-not (and (empty? chars) (zero? delims))
       [new-chars
@@ -90,7 +92,7 @@
 (defn delimiter?
   "Takes a char, returns true if it's a delimiter"
   [char]
-  (some #{char} [Underscore Asterisk Singlequote Doublequote]))
+  (some #{char} [c/Underscore c/Asterisk c/Singlequote c/Doublequote]))
 
 (defn next-delimiter
   "Takes an index and a collection of tags.
@@ -168,11 +170,11 @@
   (let [init-children (subvec (:content node) stack-bottom)
         init-children-types (mapv :tag init-children)]
     (loop [current-node node
-           openers-bottom {Asterisk    stack-bottom
-                           Underscore  stack-bottom
-                           Singlequote stack-bottom
-                           Doublequote stack-bottom}
-           closer (as-> [Asterisk Underscore] cs
+           openers-bottom {c/Asterisk    stack-bottom
+                           c/Underscore  stack-bottom
+                           c/Singlequote stack-bottom
+                           c/Doublequote stack-bottom}
+           closer (as-> [c/Asterisk c/Underscore] cs
                         (mapv #(index-of-next % init-children-types) cs)
                         (remove nil? cs)
                         (when (not-empty cs)
@@ -237,8 +239,8 @@
   [chars prev-char]
   (let [c (first chars)]
     (condp = c
-      Asterisk   (parse-emphasis chars prev-char)
-      Underscore (parse-emphasis chars prev-char)
+      c/Asterisk   (parse-emphasis chars prev-char)
+      c/Underscore (parse-emphasis chars prev-char)
       [(rest chars)
        (new-node :text (str c))])))
 
@@ -258,12 +260,41 @@
                new-prev
                (append-children node new-node))))))
 
-;; TODO
-;; Remember to parse inlines only inside paragraphs or headings
+;; -- Parsers ------------------------------------------------------------------
+
+(defparser Hardbreak
+  [_ (k/times 2 (k/sym* c/Space))
+   _ k/new-line*]
+  (new-node :hardbreak))
+
+(defparser Softbreak
+  [_ k/new-line*]
+  (new-node :softbreak))
+
+(defparser Text
+  [t k/any-char]
+  (new-node :text t))
+
+;; -- API ----------------------------------------------------------------------
+
+(defn parse-line
+  "Parses one line searching for inlines, which then converts to nodes."
+  [children]
+  (let [line (first children)]
+    (-> (k/many (k/<|> Hardbreak
+                       Softbreak
+                       Text))
+        (k/value line)
+        (compact-text-nodes))))
+
 (defn parse
-  "AST building, Phase 2: walk the half-open tree and parse inline text."
+  "AST building, Phase 2: walk the half-open tree and parse inline text;
+   build inlines nodes only out of text inside paragraphs or headings."
   [tree]
-  tree)
+  (ast/update-tree
+    tree
+    #(contains? #{:paragraph :heading} (:tag %))
+    #(update % :content parse-line)))
 
 (comment
   (def sample "*foo bar*\n")
@@ -272,6 +303,9 @@
   (append-char (append-char n sample) "aaa")
   (append-char (append-children (append-char n sample) n) "aaa")
   (parse-next-char sample nil)
-  (marchio.test/get-cmark-ast sample)
+  (marchio.test/get-cmark-ast "aaa\nbbb  \nfoo")
   (marchio.test/get-cmark-ast sample2)
-  (parse-text sample2 n))
+  (parse-text sample2 n)
+  (-> (ast/new-tree)
+      (ast/append-child (new-node :paragraph "aaa\nbbb  \nfoo"))
+      (parse)))
