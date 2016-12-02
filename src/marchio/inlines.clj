@@ -232,6 +232,7 @@
   (let [[num char] (if (vector? c)
                      [(count c) (first c)]
                      [1         c])
+        ;; TODO: here \n is a valid white, but with current logic is ignored
         bef-white? (and (= (:line p)      (:line (:white s)))
                         (= (dec (:col p)) (:col  (:white s))))
         bef-punct? (and (= (:line p)      (:line (:punct s)))
@@ -296,7 +297,7 @@
   [children]
   (let [line (first children)]
     (-> (k/many Inlines)
-        (k/value line))))
+        (k/value line "Inlines" {:white (k/make-pos "" 1 0)}))))
         ;(compact-text-nodes))))
 
 (defn parse
@@ -314,12 +315,10 @@
   (def n (marchio.ast/new-node :paragraph))
   (append-char (append-char n sample) "aaa")
   (append-char (append-children (append-char n sample) n) "aaa")
-  (parse-next-char sample nil)
   (marchio.test/get-cmark-ast "aaa\nbbb  \nfoo")
   (marchio.test/get-cmark-ast sample2)
   (marchio.test/get-cmark-ast "\\[")
   (marchio.test/get-cmark-ast "``aa`b`")
-  (parse-text sample2 n)
   (-> (ast/new-tree)
       (ast/append-child (new-node :paragraph "aaa\nbbb  \nfoo"))
       (ast/append-child (new-node :paragraph "\\["))
