@@ -19,7 +19,7 @@
            (if (= (type el) Element)
              (new-node (keyword (name (:tag el)))
                        (:attrs el)
-                       (:content el))
+                       (into [] (:content el)))
              el)))))
 
 (defn get-cmark-ast
@@ -46,11 +46,16 @@
 
 (use-fixtures :once spec-fixture)
 
-(comment
-  (deftest ast-testing
-    (doseq [{:keys [html markdown section example]} spec-tests]
-      (testing (str "AST: " section ", " example)
-        (is (= (get-cmark-ast markdown)
-               (parse/text->ast markdown))))
-      (testing (str "HTML: " section ", " example)
-        (is (= html (render/md->html markdown)))))))
+(deftest ast-testing
+  (doseq [{:keys [html markdown section example]}
+          (filter
+            #(contains?
+               #{"Inlines"}
+                 ;"Hard line breaks"}
+               (:section %))
+            spec-tests)]
+    (testing (str "AST: " section ", " example)
+      (is (= (get-cmark-ast markdown)
+             (parse/text->ast markdown))))))
+    ;(testing (str "HTML: " section ", " example)
+    ;  (is (= html (render/md->html markdown))))))
