@@ -20,6 +20,7 @@
 (def setext-heading-line #"^(?:=+|-+)[ \t]*$")
 (def line-ending #"\r\n|\n|\r")
 (def escapable #"^[!\"#$%&'()*+,./:;<=>?@\\\[\\\]^_`{|}~-]")
+(def not-inline-special #"^(?![\\`*_\\\[\\\]\!&<\t\n\r ]+)")
 
 ;; -- Html regexps
 

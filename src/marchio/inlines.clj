@@ -183,6 +183,16 @@
 
 ;; -- Parsers ------------------------------------------------------------------
 
+(defparser TextChar
+  [t k/any-char]
+  (re/match re/not-inline-special t)
+  t)
+
+;; if we encounter a nonrelevant char, just eat as many chars as possible
+(defparser Text
+  [t (k/<+> (k/many1 TextChar))]
+  (new-node :text t))
+
 (defparser Hardbreak
   [_ (k/times 2 (k/sym* c/Space))
    _ k/new-line*]
@@ -292,7 +302,7 @@
   (new-node :magic))
 
 ;; Fallback, just text
-(defparser Text
+(defparser Fallback
   [p k/get-position
    t k/any-char
    _ (cond
@@ -302,7 +312,8 @@
   (new-node :text (str t)))
 
 (def Inlines
-  (k/<|> Hardbreak
+  (k/<|> Text
+         Hardbreak
          Softbreak
          EscapedChar
          Backslash
@@ -314,7 +325,7 @@
          CloseBracket
          ;LessTHan
          ;Ampersand -> autolink | html
-         Text))
+         Fallback))
 
 ;; -- API ----------------------------------------------------------------------
 
