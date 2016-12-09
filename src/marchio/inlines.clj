@@ -266,6 +266,31 @@
      :opener? opener?
      :closer? closer?}))
 
+(defparser LinkOrImage
+  [_     (k/token* "![" "[")
+   title (k/many1 k/any-char)
+   _     (k/sym* "]")]
+  (new-node :link title))
+
+(defparser LinkOpener
+  [_ (k/sym* c/OpenBracket)]
+  {:image? false
+   :active? true
+   :label ""
+   :content []})
+
+(defparser ImageOpener
+  [_ (k/sym* c/Bang)
+   _ (k/sym* c/OpenBracket)]
+  {:image? true
+   :active? true
+   :label ""
+   :content []})
+
+(defparser CloseBracket
+  [_ (k/sym* c/CloseBracket)]
+  (new-node :magic))
+
 ;; Fallback, just text
 (defparser Text
   [p k/get-position
@@ -284,8 +309,9 @@
          InlineCode
          Backticks
          Emph
-         ;Brackets
-         ;Bang
+         LinkOpener
+         ImageOpener
+         CloseBracket
          ;LessTHan
          ;Ampersand -> autolink | html
          Text))
@@ -297,7 +323,7 @@
   [children]
   (let [line (first children)]
     (-> (k/many Inlines)
-        (k/value line "Inlines" {:white (k/make-pos "" 1 0)}))))
+        (k/value line "Inlines" {:white (k/->PPosition "" 1 0)}))))
         ;(compact-text-nodes))))
 
 (defn parse
