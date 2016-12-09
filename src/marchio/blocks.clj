@@ -1,7 +1,8 @@
 (ns marchio.blocks
   (:require [blancas.kern.core :as k]
             [marchio.combinators :as c]
-            [marchio.ast :refer [new-node]]))
+            [marchio.ast :refer [new-node new-tree]]
+            [clojure.string :as str]))
 
 ;; TODO: conj is not good of course, we need to manipulate the zipper
 ;;       and append in the right place
@@ -24,6 +25,13 @@
       tree;(close-blocks tree)
       (recur (parse-line tree (first ls))
              (rest ls)))))
+
+(defn parse
+  "Temporary replacement for testing inlines"
+  [lines]
+  (new-tree
+    (new-node :document
+      (new-node :paragraph (str/join "\n" lines)))))
 
 (comment
   (defn close-blocks
