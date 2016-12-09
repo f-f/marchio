@@ -4,7 +4,8 @@
     [clojure.walk :refer [postwalk]]
     [marchio.re :as re]
     [marchio.inlines :as inlines]
-    [marchio.blocks :as blocks]))
+    [marchio.blocks :as blocks]
+    [clojure.zip :as zip]))
 
 ;; --  Parsing strategy
 
@@ -107,8 +108,9 @@
   (->> input
        (split-lines)
        (map remove-insecure)
-       (blocks/parse)))
-       ;(inlines/parse)))
+       (blocks/parse)
+       (inlines/parse)
+       (zip/root)))
 
 ;; TODO
 (defn ast->hiccup
