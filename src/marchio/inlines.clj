@@ -195,7 +195,9 @@
 
 (defparser Hardbreak
   [_ (k/times 2 (k/sym* c/Space))
-   _ k/new-line*]
+   _ (k/skip-many (k/sym* c/Space))
+   _ k/new-line*
+   _ (k/skip-many (k/sym* c/Space))]
   (new-node :linebreak))
 
 (defparser Softbreak
