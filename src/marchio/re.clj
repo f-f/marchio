@@ -4,6 +4,7 @@
 ;; -- Defs
 
 (def code-indent 4)
+(def spaces-string " \t\f\r\n\u000B")
 
 ;; -- Easy regexps
 
@@ -12,6 +13,7 @@
 (def thematic-break #"^(?:(?:\*[ \t]*){3,}|(?:_[ \t]*){3,}|(?:-[ \t]*){3,})[ \t]*$")
 (def maybe-special #"^[#`~*+_=<>0-9-]")
 (def non-space #"[^ \t\f\v\r\n\u000B]")
+(def space #"^[ \t\f\v\r\n\u000B]")
 (def bullet-list-marker #"^[*+-]")
 (def ordered-list-marker #"^(\d{1,9})([.])")
 (def ATX-heading-marker #"^#{1,6}(?:[ \t]+|$)")
@@ -20,7 +22,7 @@
 (def setext-heading-line #"^(?:=+|-+)[ \t]*$")
 (def line-ending #"\r\n|\n|\r")
 (def escapable #"^[!\"#$%&'()*+,./:;<=>?@\\\[\\\]^_`{|}~-]")
-(def not-inline-special #"^(?![\\`*_\\\[\\\]\!&<\t\n\r ]+)")
+(def not-inline-special #"^(?![\\`*_\"\\\[\\\]\!&<\t\n\r ]+)")
 
 ;; -- Html regexps
 
