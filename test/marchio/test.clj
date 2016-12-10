@@ -50,11 +50,11 @@
   (doseq [{:keys [html markdown section example]}
           (filter
             #(contains?
-               #{"Inlines"}
-                 ;"Hard line breaks"}
+               #{"Inlines"
+                 "Hard line breaks"}
                (:section %))
             spec-tests)]
-    (testing (str "AST: " section ", " example)
+    (testing (str "AST: " section ", " example "\nText: " markdown)
       (is (= (get-cmark-ast markdown)
              (parse/text->ast markdown))))))
     ;(testing (str "HTML: " section ", " example)
