@@ -51,32 +51,33 @@
           (->> spec-tests
                (filter
                  #(contains?
-                    #{;"Precedence"
-                      ;"Textual content"
+                    #{"Inlines"
+                      "Backslash escapes"
+                      ;"Entity and numeric character references"
+                      "Code spans"
+                      ;"Emphasis and strong emphasis"
+                      ;"Links"
+                      ;"Images"
+                      ;"Autolinks"
+                      ;"Raw HTML"
+                      "Hard line breaks"
+                      "Soft line breaks"}
+                      ;"Textual content"}
+
+                      ;"Precedence"
                       ;"ATX headings"
                       ;"Fenced code blocks"
                       ;"HTML blocks"
-                      ;"Code spans"
                       ;"Indented code blocks"
-                      "Soft line breaks"
-                      ;"Backslash escapes"
                       ;"Paragraphs"
                       ;"Link reference definitions"
                       ;"Tabs"
                       ;"Thematic breaks"
-                      ;"Emphasis and strong emphasis"
                       ;"List items"
-                      ;"Entity and numeric character references"
                       ;"Blank lines"
-                      ;"Images"
                       ;"Lists"
                       ;"Setext headings"
                       ;"Block quotes"
-                      ;"Autolinks"
-                      ;"Hard line breaks"
-                      "Inlines"}
-                      ;"Links"
-                      ;"Raw HTML"}
                     (:section %)))
                ;; Filter even more on tests that fail
                (remove
@@ -91,10 +92,14 @@
                       297 ; Link
                       298 ; Link
                       299 ; Code block
+                      320 ; Emph
+                      323 ; HTML
+                      325 ; Link
                       607 ; Emph
                       608 ; Emph
                       611 ; HTML
                       612 ; HTML
+                      614 ; Block space processing
                       615 ; Headings
                       616 ; Headings
                       618}; Block alignment
