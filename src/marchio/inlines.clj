@@ -194,26 +194,25 @@
   (new-node :text t))
 
 (defparser Hardbreak
-  [_ (k/times 2 (k/sym* c/Space))
-   _ (k/skip-many (k/sym* c/Space))
-   _ k/new-line*
+  [_ (k/<|> (k/<:> (k/<*> (k/times 2 (k/sym* c/Space))
+                          (k/skip-many (k/sym* c/Space))))
+            (k/sym* c/Backslash))
+   _ (cs/from-re re/line-ending)
    _ (k/skip-many (k/sym* c/Space))]
   (new-node :linebreak))
 
 (defparser Softbreak
-  [_ k/new-line*]
+  [_ (cs/from-re re/line-ending)
+   _ (k/skip-many (k/sym* c/Space))]
   (new-node :softbreak))
 
-;; Backslash, 1+2
+;; Backslash, 1
 (defparser EscapedChar
   [_ (k/sym* c/Backslash)
-   t (k/<|> (k/sym* c/Newline)
-            (cs/from-re re/escapable))]
-  (if (= t c/Newline)
-    (new-node :linebreak)
-    (new-node :text (str t))))
+   t (cs/from-re re/escapable)]
+  (new-node :text (str t)))
 
-;; Backslash, 3
+;; Backslash, 2
 (defparser Backslash
   [_ (k/sym* c/Backslash)]
   (new-node :text "\\"))
