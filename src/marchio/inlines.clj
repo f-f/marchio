@@ -189,9 +189,9 @@
                   last-str (-> last-t :content first)]
               (if (and (= tag :text)
                        (= (:tag last-t) :text)
-                       (or (re/match #"^[a-zA-Z]+" (first content))
+                       (or (re/match #"\p{L}+" (first content))
                            (re/match re/space (first content)))
-                       (or (re/match #"^[a-zA-Z]+" last-str)
+                       (or (re/match #"\p{L}+" last-str)
                            (re/match re/space last-str)))
                 (conj (pop new-vec)
                       (update-in (last new-vec)

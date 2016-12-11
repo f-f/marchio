@@ -61,8 +61,8 @@
                       ;"Autolinks"
                       ;"Raw HTML"
                       "Hard line breaks"
-                      "Soft line breaks"}
-                      ;"Textual content"}
+                      "Soft line breaks"
+                      "Textual content"}
 
                       ;"Precedence"
                       ;"ATX headings"
