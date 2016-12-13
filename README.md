@@ -5,6 +5,7 @@
 TODO
 
 [![Dependency Status](https://www.versioneye.com/user/projects/57df6c1b037c2000458f785a/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/57df6c1b037c2000458f785a)
+[![CircleCI](https://circleci.com/gh/f-f/marchio.svg?style=svg)](https://circleci.com/gh/f-f/marchio)
 
 ## Rationale
 
