@@ -8,7 +8,8 @@
     [marchio.re :as re :refer [match]]
     [marchio.ast :as ast :refer [new-node]]
     [marchio.combinators :as cs :refer [defparser]]
-    [clojure.string :as string]))
+    [clojure.string :as string]
+    [entities.core :refer [decode-html]]))
 
 ;; -- Phase 2
 ;; -- Inline parsers
@@ -316,6 +317,10 @@
        (k/<$> (fn [_] (new-node :text "<"))      (k/sym* c/LessThan)))]
   n)
 
+(defparser Entity
+  [e (cs/word-from-re re/entity)]
+  (new-node :text (decode-html e)))
+
 ;; Fallback, just text
 (defparser Fallback
   [p k/get-position
@@ -339,7 +344,7 @@
          ImageOpener
          CloseBracket
          InlineHTML
-         ;Ampersand -> autolink | html
+         Entity
          Fallback))
 
 ;; -- API ----------------------------------------------------------------------

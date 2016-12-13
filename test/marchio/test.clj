@@ -21,7 +21,6 @@
                        (:attrs el)
                        (->> el
                             (:content)
-                            (compact-text-nodes)
                             (into [])))
              el)))))
 
@@ -29,7 +28,7 @@
   "Parse markdown with cmark, return marchio AST."
   [markdown]
   (xml/declare-ns "commonmark" "http://commonmark.org/xml/1.0")
-  (-> (sh "cmark" "--to" "xml" :in markdown)
+  (-> (sh "cmark" "--to" "xml" "--normalize" :in markdown)
       (:out)
       (xml/parse-str)
       (cmark->marchio)))
@@ -56,7 +55,7 @@
                  #(contains?
                     #{"Inlines"
                       "Backslash escapes"
-                      ;"Entity and numeric character references"
+                      "Entity and numeric character references"
                       "Code spans"
                       ;"Emphasis and strong emphasis"
                       ;"Links"
@@ -95,6 +94,11 @@
                       297 ; Link
                       298 ; Link
                       299 ; Code block
+                      306 ; HTML block
+                      307 ; Link
+                      308 ; Link
+                      309 ; Code block
+                      311 ; Code block
                       320 ; Emph
                       325 ; Link
                       595 ; Block parsing
@@ -105,7 +109,7 @@
                       616 ; Headings
                       618}; Block alignment
                     (:example %))))]
-               ;(filter #(= 591 (:example %))))]
+               ;(filter #(= 302 (:example %))))]
     (testing (str "AST: " section ", " example "\nText: " markdown)
       (is (= (get-cmark-ast markdown)
              (parse/text->ast markdown))))))
