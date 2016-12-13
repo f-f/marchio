@@ -37,23 +37,20 @@
 (def OPENTAG (str "<" TAGNAME ATTRIBUTE "*" "\\s*/?>"))
 (def CLOSETAG (str "</" TAGNAME "\\s*[>]"))
 
-(def html-block-open
-  [#"."
-   #"(?i)^<(?:script|pre|style)(?:\s|>|$)" ;; (?i) is for case insensitive!
-   #"^<!--"
-   #"^<[?]"
-   #"^<![A-Z]"
-   #"^<!\[CDATA\["
-   #"^<[/]?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h[123456]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|section|source|title|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?:\s|[/]?[>]|$)"
-   (re-pattern (str "(?i)^(?:" OPENTAG "|" CLOSETAG ")\\\\s*$"))])
+(def HTMLCOMMENT "<!---->|<!--(?:-?[^>-])(?:-?[^-])*-->")
+(def PROCESSINGINSTRUCTION "[<][?].*?[?][>]")
+(def DECLARATION (str "<![A-Z]+" "\\s+[^>]*>"))
+(def CDATA "<!\\[CDATA\\[[\\s\\S]*?\\]\\]>")
+(def HTMLTAG (str "(?:" OPENTAG
+                  "|" CLOSETAG
+                  "|" HTMLCOMMENT
+                  "|" PROCESSINGINSTRUCTION
+                  "|" DECLARATION
+                  "|" CDATA ")"))
 
-(def html-block-close
-  [#"."
-   #"(?i)<\/(?:script|pre|style)>"
-   #"-->"
-   #"\?>"
-   #">"
-   #"\]\]>"])
+(def html-tag (re-pattern (str "(?i)^" HTMLTAG)))
+
+(def entity #"^&(?:#x[a-f0-9]{1,8}|#[0-9]{1,8}|[a-z][a-z0-9]{1,31});")
 
 ;; -- Utils
 
