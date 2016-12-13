@@ -342,11 +342,14 @@
 
 (defparser CloseBracket
   [_ (k/sym* c/CloseBracket)]
-  (new-node :magic))
+  (new-node :text "]"))
 
-(defparser LessThan
-  [c (k/sym* c/LessThan)]
-  (new-node :text (str c)))
+(defparser InlineHTML
+  [_ (k/look-ahead (k/sym* c/LessThan))
+   n (k/<|>
+       (k/<$> (fn [r] (new-node :html_inline r)) (cs/word-from-re re/html-tag))
+       (k/<$> (fn [_] (new-node :text "<"))      (k/sym* c/LessThan)))]
+  n)
 
 ;; Fallback, just text
 (defparser Fallback
@@ -370,7 +373,7 @@
          LinkOpener
          ImageOpener
          CloseBracket
-         LessThan
+         InlineHTML
          ;Ampersand -> autolink | html
          Fallback))
 
@@ -379,8 +382,9 @@
 (defn parse-line
   "Parses one line searching for inlines, which then converts to nodes."
   [children]
+  ;(println (str children))
   (let [line (first children)]
-    (-> (k/many Inlines)
+    (-> (k/many1 Inlines)
         (k/value line "Inlines" {:white (k/->PPosition "" 1 0)})
         (process-emph)
         (compact-text-nodes))))
