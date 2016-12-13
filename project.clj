@@ -16,6 +16,7 @@
                  [org.clojure/tools.cli "0.3.5"]
                  [better-cond "1.0.1"]
                  [cheshire "5.6.3"]
+                 [djy "0.1.4"]
                  [hiccup "1.0.5"]
                  [me.raynes/fs "1.4.6"]
                  [medley "0.8.4"]
