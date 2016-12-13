@@ -6,7 +6,7 @@
     [clojure.test :refer [use-fixtures deftest testing is]]
     [cheshire.core :refer [parse-string generate-string]]
     [marchio.render :as render]
-    [marchio.ast :refer [new-node]]
+    [marchio.ast :refer [new-node compact-text-nodes]]
     [marchio.parse :as parse])
   (:import (clojure.data.xml.node Element)))
 
@@ -19,7 +19,10 @@
            (if (= (type el) Element)
              (new-node (keyword (name (:tag el)))
                        (:attrs el)
-                       (into [] (:content el)))
+                       (->> el
+                            (:content)
+                            (compact-text-nodes)
+                            (into [])))
              el)))))
 
 (defn get-cmark-ast
@@ -59,7 +62,7 @@
                       ;"Links"
                       ;"Images"
                       ;"Autolinks"
-                      ;"Raw HTML"
+                      "Raw HTML"
                       "Hard line breaks"
                       "Soft line breaks"
                       "Textual content"}
@@ -88,22 +91,21 @@
                       293 ; Code block
                       294 ; Code block
                       295 ; Link
-                      296 ; HTML
+                      296 ; HTML block
                       297 ; Link
                       298 ; Link
                       299 ; Code block
                       320 ; Emph
-                      323 ; HTML
                       325 ; Link
+                      595 ; Block parsing
                       607 ; Emph
                       608 ; Emph
-                      611 ; HTML
-                      612 ; HTML
                       614 ; Block space processing
                       615 ; Headings
                       616 ; Headings
                       618}; Block alignment
                     (:example %))))]
+               ;(filter #(= 591 (:example %))))]
     (testing (str "AST: " section ", " example "\nText: " markdown)
       (is (= (get-cmark-ast markdown)
              (parse/text->ast markdown))))))

@@ -45,6 +45,22 @@
   [tree new]
   (z/append-child tree new))
 
+(defn compact-text-nodes
+  "Given a list of text nodes, join together the contiguous ones."
+  [nodes]
+  (reduce (fn [new-vec {:keys [tag content] :as el}]
+            (let [last-t   (last new-vec)
+                  last-str (-> last-t :content first)]
+              (if (and (= tag :text)
+                       (= (:tag last-t) :text))
+                (conj (pop new-vec)
+                      (update-in (last new-vec)
+                                 [:content 0]
+                                 #(str % (first content))))
+                (conj new-vec el))))
+          []
+          nodes))
+
 (comment
   (-> (new-tree)
       (z/append-child (new-node :text "test"))

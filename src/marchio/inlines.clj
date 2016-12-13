@@ -82,20 +82,6 @@
          %)
        children))
 
-(defn compact-text-nodes
-  "Given a list of text nodes, join together the contiguous ones."
-  [children]
-  (reduce (fn [new-vec el]
-            (if (and (= (:tag el) :text)
-                     (= (:tag (last new-vec)) :text))
-              (conj (pop new-vec)
-                    (update-in (last new-vec)
-                               [:content 0]
-                               #(str % (first (:content el)))))
-              (conj new-vec el)))
-          []
-          children))
-
 (defn update-delimiters
   "Subtracts the given delimiters to the node n. If new count is 0, retuns nil.
    WARNING: returns a list with one element or nil."
@@ -107,7 +93,7 @@
 (defn normalize-node
   "Finalize the node after having processed emphasis"
   [node]
-  (update node :content #(-> % remove-delimiters compact-text-nodes)))
+  (update node :content #(-> % remove-delimiters ast/compact-text-nodes)))
 
 (defn process-emph
   "Process the children of the current node to generate emphasis inlines.
@@ -153,7 +139,7 @@
                                         (-> children
                                             (subvec (inc opener) closer) ; 2.
                                             (remove-delimiters) ; 3a.
-                                            (compact-text-nodes))) ; 3b.
+                                            (ast/compact-text-nodes))) ; 3b.
                     [new-op new-cl] (mapv #(update-delimiters % delims) ; 5, 6.
                                           [opener-node closer-node])
                     new-children (fold [(subvec children 0 opener)
@@ -179,27 +165,6 @@
                        current-node)
                      (assoc openers-bottom char (dec closer)) ; 1.
                      (next-delimiter closer children-types))))))))) ; 3.
-
-;; Dummy implementation to pass the tests
-(defn compact-text-nodes
-  "Given a list of text nodes, join together the contiguous ones."
-  [nodes]
-  (reduce (fn [new-vec {:keys [tag content] :as el}]
-            (let [last-t   (last new-vec)
-                  last-str (-> last-t :content first)]
-              (if (and (= tag :text)
-                       (= (:tag last-t) :text)
-                       (or (re/match #"\p{L}+" (first content))
-                           (re/match re/space (first content)))
-                       (or (re/match #"\p{L}+" last-str)
-                           (re/match re/space last-str)))
-                (conj (pop new-vec)
-                      (update-in (last new-vec)
-                                 [:content 0]
-                                 #(str % (first content))))
-                (conj new-vec el))))
-          []
-          nodes))
 
 ;; Dummy implementation to pass the tests
 (defn process-emph [nodes]
@@ -387,7 +352,7 @@
     (-> (k/many1 Inlines)
         (k/value line "Inlines" {:white (k/->PPosition "" 1 0)})
         (process-emph)
-        (compact-text-nodes))))
+        (ast/compact-text-nodes))))
 
 (defn parse
   "AST building, Phase 2: walk the half-open tree and parse inline text;
