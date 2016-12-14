@@ -85,8 +85,6 @@
                (remove
                  #(contains? ; Reason to exclude them:
                     #{288 ; Tabs
-                      289 ; Emph
-                      290 ; Emph
                       293 ; Code block
                       294 ; Code block
                       295 ; Link
@@ -99,17 +97,22 @@
                       308 ; Link
                       309 ; Code block
                       311 ; Code block
-                      320 ; Emph
                       325 ; Link
+                      381 ; Link
+                      393 ; Link
+                      396 ; Link
+                      407 ; Link
+                      447 ; Link
+                      448 ; Link
+                      454 ; Link
+                      455 ; Link
                       595 ; Block parsing
-                      607 ; Emph
-                      608 ; Emph
                       614 ; Block space processing
                       615 ; Headings
                       616 ; Headings
                       618}; Block alignment
                     (:example %))))]
-               ;(filter #(= 302 (:example %))))]
+               ;(filter #(= 290 (:example %))))]
     (testing (str "AST: " section ", " example "\nText: " markdown)
       (is (= (get-cmark-ast markdown)
              (parse/text->ast markdown))))))
