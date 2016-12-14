@@ -85,6 +85,7 @@
                      [(count c) (first c)]
                      [1         c])
         before (:last s)
+        after (if after after \newline)
         bef-white? (match re/unicode-whitespace before)
         bef-punct? (match re/punctuation before)
         aft-white? (match re/unicode-whitespace after)
@@ -182,7 +183,7 @@
   ;(println (str children))
   (let [line (first children)]
     (-> (k/many1 Inlines)
-        (k/value line "Inlines" {:white (k/->PPosition "" 1 0)})
+        (k/value line "Inlines" {:last \newline})
         (emph/process-emph))))
 
 (defn parse
