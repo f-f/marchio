@@ -76,7 +76,6 @@
 ;; Info returned: run length, and if they can open and/or close sequences.
 (defparser Emph
   [s     k/get-state
-   p     k/get-position
    c     (k/<|> (k/sym* c/Singlequote)
                 (k/sym* c/Doublequote)
                 (k/many1 (k/sym* c/Asterisk))
@@ -85,11 +84,9 @@
   (let [[num char] (if (vector? c)
                      [(count c) (first c)]
                      [1         c])
-        ;; TODO: here \n is a valid white, but with current logic is ignored
-        bef-white? (and (= (:line p)      (:line (:white s)))
-                        (= (dec (:col p)) (:col  (:white s))))
-        bef-punct? (and (= (:line p)      (:line (:punct s)))
-                        (= (dec (:col p)) (:col  (:punct s))))
+        before (:last s)
+        bef-white? (match re/unicode-whitespace before)
+        bef-punct? (match re/punctuation before)
         aft-white? (match re/unicode-whitespace after)
         aft-punct? (match re/punctuation after)
         left-flanking (and (not aft-white?)
@@ -158,12 +155,7 @@
 
 ;; Fallback, just text
 (defparser Fallback
-  [p k/get-position
-   t k/any-char
-   _ (cond
-       (re/match re/unicode-whitespace t) (k/modify-state #(assoc % :white p))
-       (re/match re/punctuation t)        (k/modify-state #(assoc % :punct p))
-       :else k/get-state)]
+  [t k/any-char]
   (new-node :text (str t)))
 
 (def Inlines
