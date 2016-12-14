@@ -1,0 +1,17 @@
+machine:
+  python:
+    version: 3.5.2
+
+dependencies:
+  pre:
+    - git clone https://github.com/jgm/cmark.git $HOME/cmark
+    - mkdir -p ~/cmark/build
+    - bash -c "cd ~/cmark/build && cmake .. && make && make test && sudo make install"
+  cache_directories:
+    - ~/.m2
+    - ~/.lein
+
+checkout:
+  post:
+  - git submodule sync --recursive
+  - git submodule update --recursive --init
