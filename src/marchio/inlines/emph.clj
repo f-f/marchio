@@ -2,23 +2,21 @@
   (:require
     [clojure.string :as string]
     [marchio.ast :as ast :refer [new-node]]
-    [uncomplicate.fluokitten.core :refer [fmap fapply bind return fold foldmap]]
+    [uncomplicate.fluokitten.core :refer [fmap fapply bind return fold foldmap op]]
     [uncomplicate.fluokitten.jvm]
     [marchio.chars :as c]))
 
-(defn append-char [node char]
-  (update node :content
-          (fn [children]
-            (if-not (string? (last children))
-              (conj (or children []) char)
-              (assoc children (dec (count children))
-                              (str (last children) char))))))
-
-
-
-
-
 (def not-neg? (complement neg?))
+
+(defn delimiter?
+  "Takes a char, returns true if it's a delimiter"
+  [char]
+  (some #{char} [c/Underscore c/Asterisk c/Singlequote c/Doublequote]))
+
+(defn delimiter->text
+  "Converts a delimiter to a text node."
+  [{:keys [tag delims]}]
+  (new-node :text (string/join (repeat delims tag))))
 
 (defn index-of
   "Returns the index of first el in coll if found, otherwise nil"
@@ -32,11 +30,6 @@
   [char chars-types]
   (when-let [index (-> chars-types (subvec 1) (index-of char))]
     (inc index)))
-
-(defn delimiter?
-  "Takes a char, returns true if it's a delimiter"
-  [char]
-  (some #{char} [c/Underscore c/Asterisk c/Singlequote c/Doublequote]))
 
 (defn next-delimiter
   "Takes an index and a collection of tags.
@@ -52,6 +45,10 @@
 (defn previous-opener
   "Returns the previous opener before the closer index, of the same char."
   [closer closer-char children openers-bottom]
+  ;(println closer)
+  ;(println closer-char)
+  ;(println children)
+  ;(println openers-bottom)
   (let [children-stripe (reverse (subvec children
                                          (get openers-bottom closer-char)
                                          closer))
@@ -61,18 +58,11 @@
                         (count))
         previous (- closer
                     steps-back
-                    (get openers-bottom closer-char)
                     1)]
     (when (not-neg? previous) previous)))
 
-(defn delimiter->text
-  "Converts a delimiter to a text node."
-  [{:keys [tag delims]}]
-  (new-node :text (string/join (repeat delims tag))))
-
 (defn remove-delimiters
-  "Converts candidate delimiters to normal text in case of no match.
-   Multiple arity operates only between start and end - both not included."
+  "Converts candidate delimiters to normal text in case of no match."
   [children]
   (map #(if (delimiter? (:tag %))
           (delimiter->text %)
@@ -86,6 +76,23 @@
   (let [new-ds (- (:delims n) delims)]
     (when (pos? new-ds)
       [(assoc n :delims new-ds)])))
+
+(defn create-nested-emph
+  "Given a number of delims and a list of children, creates a series of nested
+   nodes until there are no more delimiters available.
+   Returns the root emph node."
+  [n children]
+  (let [sequence (op (if (odd? n) [:emph] [])
+                     (repeat (quot n 2) :strong))]
+    (loop [nxt (rest sequence)
+           n   (new-node (first sequence)
+                         {}
+                         children)]
+      (if (empty? nxt)
+        n
+        (recur (rest nxt)
+               (new-node (first nxt)
+                         n))))))
 
 (defn normalize-nodes
   "Finalize the nodes list after having processed emphasis"
@@ -121,23 +128,24 @@
                                (nth children opener))
                  opener-delims (:delims opener-node)
                  closer-delims (:delims closer-node)]
+                 ;_ (println "closer index: " closer)
+                 ;_ (println "op node: " opener-node)]
              (if (and (:closer? closer-node) opener-delims) ;; TODO: get rid of nil in opener-delims
                ;; Good, we found a matching opener-closer pair! Things to do:
-               ;; 1. Figure out if it's emph or strong emph
+               ;; 1. Figure out the sequence of nested strong and emph nodes
                ;; 2. Put all the nodes between the opener and closer inside
                ;;    the new
                ;; 3. Convert the delims inside to text, compact the text nodes
                ;; 4. Insert the new node *after* the opener
                ;; 5. Subtract the # of delimiters from opener and closer
                ;; 6. If a delimiter becomes empty, remove it.
-               (let [delims (min 2 opener-delims closer-delims)
-                     strong? (> delims 1) ;; 1.
-                     emph-node (new-node (if strong? :strong :emph)
-                                         {}
-                                         (-> children
-                                             (subvec (inc opener) closer) ; 2.
-                                             (remove-delimiters) ; 3a.
-                                             (ast/compact-text-nodes))) ; 3b.
+               (let [delims (min opener-delims closer-delims)
+                     emph-node (create-nested-emph ;; 1.
+                                 delims
+                                 (-> children
+                                     (subvec (inc opener) closer) ; 2.
+                                     (remove-delimiters) ; 3a.
+                                     (ast/compact-text-nodes))) ; 3b.
                      [new-op new-cl] (mapv #(update-delimiters % delims) ; 5, 6.
                                            [opener-node closer-node])
                      new-children (fold [(subvec children 0 opener)
