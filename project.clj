@@ -20,7 +20,7 @@
                  [hiccup "1.0.5"]
                  [me.raynes/fs "1.4.6"]
                  [medley "0.8.4"]
-                 [org.blancas/kern "1.0.0"]
+                 [org.blancas/kern "1.1.0"]
                  [swiss-arrows "1.0.0"]
                  [uncomplicate/fluokitten "0.5.1"]]
 
