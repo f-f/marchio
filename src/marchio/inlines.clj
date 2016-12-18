@@ -76,8 +76,8 @@
 ;; Info returned: run length, and if they can open and/or close sequences.
 (defparser Emph
   [s     k/get-state
-   c     (k/<|> (k/sym* c/Singlequote)
-                (k/sym* c/Doublequote)
+   c     (k/<|> ;(k/sym* c/Singlequote)
+                ;(k/sym* c/Doublequote)
                 (k/many1 (k/sym* c/Asterisk))
                 (k/many1 (k/sym* c/Underscore)))
    after (k/look-ahead k/any-char)]

@@ -45,10 +45,6 @@
 (defn previous-opener
   "Returns the previous opener before the closer index, of the same char."
   [closer closer-char children openers-bottom]
-  ;(println closer)
-  ;(println closer-char)
-  ;(println children)
-  ;(println openers-bottom)
   (let [children-stripe (reverse (subvec children
                                          (get openers-bottom closer-char)
                                          closer))
@@ -128,9 +124,12 @@
                                (nth children opener))
                  opener-delims (:delims opener-node)
                  closer-delims (:delims closer-node)]
-                 ;_ (println "closer index: " closer)
-                 ;_ (println "op node: " opener-node)]
-             (if (and (:closer? closer-node) opener-delims) ;; TODO: get rid of nil in opener-delims
+             (if (and (:closer? closer-node)
+                      opener-delims ;; TODO: get rid of nil in opener-delims
+                      ;; Spec, example 388:
+                      (if (:opener? closer-node)
+                        (pos? (mod (+ opener-delims closer-delims) 3))
+                        true))
                ;; Good, we found a matching opener-closer pair! Things to do:
                ;; 1. Figure out the sequence of nested strong and emph nodes
                ;; 2. Put all the nodes between the opener and closer inside
@@ -144,8 +143,7 @@
                                  delims
                                  (-> children
                                      (subvec (inc opener) closer) ; 2.
-                                     (remove-delimiters) ; 3a.
-                                     (ast/compact-text-nodes))) ; 3b.
+                                     (normalize-nodes))) ; 3.
                      [new-op new-cl] (mapv #(update-delimiters % delims) ; 5, 6.
                                            [opener-node closer-node])
                      new-children (fold [(subvec children 0 opener)
@@ -158,7 +156,7 @@
                      new-children-types (mapv :tag new-children)]
                  (recur new-children
                         openers-bottom
-                        (next-delimiter (- closer right-number)
+                        (next-delimiter (- closer right-number 1)
                                         new-children-types)))
                ;; No opener around here. We proceed to:
                ;; 1. Advance the stack bottom for the current char to current
@@ -169,5 +167,5 @@
                                 closer
                                 delimiter->text)
                         children)
-                      (assoc openers-bottom char (dec closer)) ; 1.
+                      openers-bottom;(assoc openers-bottom char (dec closer)) ; 1.
                       (next-delimiter closer children-types)))))))))) ; 3.

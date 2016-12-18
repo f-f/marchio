@@ -57,7 +57,7 @@
                       "Backslash escapes"
                       "Entity and numeric character references"
                       "Code spans"
-                      ;"Emphasis and strong emphasis"
+                      "Emphasis and strong emphasis"
                       ;"Links"
                       ;"Images"
                       ;"Autolinks"
