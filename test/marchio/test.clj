@@ -60,7 +60,7 @@
                       "Emphasis and strong emphasis"
                       ;"Links"
                       ;"Images"
-                      ;"Autolinks"
+                      "Autolinks"
                       "Raw HTML"
                       "Hard line breaks"
                       "Soft line breaks"

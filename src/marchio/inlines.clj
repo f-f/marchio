@@ -143,6 +143,18 @@
   [_ (k/sym* c/CloseBracket)]
   (new-node :text "]"))
 
+(let [cut    (fn [s] (subs s 1 (dec (count s))))
+      mailto (fn [e] [(str "mailto:" e) e])
+      autoln (fn [d] [d                 d])]
+  (defparser Autolink
+    [a (k/<|>
+         (k/<$> (comp mailto cut) (cs/word-from-re re/email-autolink))
+         (k/<$> (comp autoln cut) (cs/word-from-re re/autolink)))]
+    (new-node :link
+              {:title ""
+               :destination (first a)}
+              [(new-node :text (second a))])))
+
 (defparser InlineHTML
   [_ (k/look-ahead (k/sym* c/LessThan))
    n (k/<|>
@@ -171,6 +183,7 @@
          LinkOpener
          ImageOpener
          CloseBracket
+         Autolink
          InlineHTML
          Entity
          Fallback))
