@@ -72,10 +72,10 @@
              (k/return (str c))
              (k/fail "No match from regex")))))
 
-(defn word-from-re [re]
+(defn word-from-re [r]
   (k/<:> (k/bind [i k/get-input
                   p k/get-position]
-           (if-let [m (re/match re (string/join i))]
+           (if-let [m (re/match r (string/join i))]
              (k/bind [_ (k/set-input (drop (count m) i))
                       _ (k/set-position (str-pos p (take (count m) i)))
                       _ k/clear-empty]
