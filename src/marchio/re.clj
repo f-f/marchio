@@ -24,6 +24,10 @@
 (def escapable #"^[!\"#$%&'()*+,./:;<=>?@\\\[\\\]^_`{|}~-]")
 (def not-inline-special #"^(?![\\`*_\"\\\[\\\]\!&<\t\n\r ]+)")
 
+(def email-autolink #"(?i)^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*)>")
+(def autolink #"(?i)^<[A-Za-z][A-Za-z0-9.+-]{1,31}:[^<>\x00-\x20]*>")
+
+
 ;; -- Html regexps
 
 (def TAGNAME "[A-Za-z][A-Za-z0-9-]*")
@@ -55,7 +59,10 @@
 ;; -- Utils
 
 (defn match [re in]
-  (re-find re (if-not (string? in) (str in) in)))
+  (let [m (re-find re (if-not (string? in) (str in) in))]
+    (if (vector? m)
+      (first m)
+      m)))
 
 (defn is-blank?
   "Returns true if string contains only space characters."
